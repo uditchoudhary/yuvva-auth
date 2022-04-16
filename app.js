@@ -16,7 +16,6 @@ app.use("/api/auth", authRouter);
 app.use("/api/", router);
 
 
-
 app.listen(port, (res, err) => {
     if(err) console.log("Failed to start", err)
     console.log(`Running on port`, port);

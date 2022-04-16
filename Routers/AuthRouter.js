@@ -7,9 +7,14 @@ const User = require("../Model/UserSchema");
 const defResponse = require("../Response/Default");
 // import defResponse from "../Response/Default"
 const { transformError } = require("../Response/Errors");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+
+let secret = process.env.jwtSeceret;
 
 router.get("/", (req, res) => {
   res.send("Hello! Welcome to auth router");
@@ -71,7 +76,17 @@ router.post("/login", (req, res) => {
         .send(transformError(defResponse.RES_SERVER_ERROR, err));
     }
     if (!user) {
-      return res.status(404).send();
+      return res.status(404).send(defResponse.RES_USER_NOT_EXIST);
+    } else {
+      const passValidity = bcrypt.compareSync(req.body.password, user.password);
+      if (!passValidity)
+        return res.status(401).send(defResponse.RES_USER_UNAUTHORISED);
+      else {
+        let jwtToken = jwt.sign({ id: user._id }, secret, {
+          expiresIn: 1800000,
+        });
+        res.status(200).send({ auth: true, token: jwtToken });
+      }
     }
   });
 });
