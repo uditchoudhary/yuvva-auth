@@ -52,6 +52,7 @@ router.post("/register", (req, res) => {
             email: req.body.email,
             password: hashPassword,
             isAdmin: req.body.isAdmin ? req.body.isAdmin: false,
+            phone: req.body.phone
           },
           (err, data) => {
             if (err) {
@@ -94,10 +95,10 @@ router.post("/login", (req, res) => {
 // User information for self
 router.get('/profile', verifyUser, (req, res) => {
     User.findOne({"_id":req.user.id}, (err, user) => {
-        console.log(user)
         res.status(200).send({
             name: user.name,
             email: user.email,
+            phone: user.phone,
             isAdmin: user.isAdmin
         })
     })

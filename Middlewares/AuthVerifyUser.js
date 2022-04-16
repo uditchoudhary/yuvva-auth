@@ -6,6 +6,7 @@ const secretJWTToken = process.env.jwtSeceret;
 
 module.exports = (req, res, next) => {
     const authHeader = req.headers.authorization
+    if(!authHeader)return res.status(404).send("Access Denied");
     const token = authHeader.split(" ")[1];
     if(!token) return res.status(404).send("Access Denied")
     try {

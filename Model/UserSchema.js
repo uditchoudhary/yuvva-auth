@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     required: false,
   },
+  phone: {
+      type: Number,
+      required: true
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);
