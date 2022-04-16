@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../Model/UserSchema");
+const defResponse = require("../Response/Default")
+// import defResponse from "../Response/Default"
+const { transformError } = require("../Response/Errors");
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -22,7 +25,6 @@ router.get("/users", (req, res) => {
 
 // Register a user
 router.post("/register", (req, res) => {
-  console.log(req.body);
   if (!req.body.password) return res.status(400).send("Bad Request - Password is missing");
   User.findOne(
     {
@@ -34,9 +36,7 @@ router.post("/register", (req, res) => {
           .status(500)
           .send("Request to register failed due to server issue");
       if (user)
-        return res
-          .status(409)
-          .send({ message: "User already exist", redirect: `/login` });
+        return res.status(409).send(transformError(defResponse.RES_USER_EXIST));
     }
   );
 
@@ -51,16 +51,25 @@ router.post("/register", (req, res) => {
     (err, data) => {
       if (err) {
         return res
-          .status(200)
-          .send("Request to register failed due to server issue", err);
+          .status(500)
+          .send("Request to register failed due to server issue");
       }
-
       res
         .status(200)
         .send({ message: "Regisration Successfull", redirect: `/login` });
     }
   );
 });
+
+
+// User Login
+
+router.post('/login', (req, res) => {
+    User.findOne({ email: req.body.email}, (err, user) => {
+        if(err) return res.status(500).send("Request to register failed due to server issue");
+
+    })
+})
 
 
 module.exports = router;
