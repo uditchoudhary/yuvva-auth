@@ -8,7 +8,8 @@ const defResponse = require("../Response/Default");
 // import defResponse from "../Response/Default"
 const { transformError } = require("../Response/Errors");
 const dotenv = require("dotenv");
-
+const verifyUser = require("../Middlewares/AuthVerifyUser");
+const verifyAdmin = require("../Middlewares/AuthVerifyAdmin");
 dotenv.config();
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -21,7 +22,7 @@ router.get("/", (req, res) => {
 });
 
 // Fetch all users
-router.get("/users", (req, res) => {
+router.get("/users", verifyUser, verifyAdmin, (req, res) => {
   User.find({}, (err, data) => {
     if (err) throw err;
     res.send(data);
@@ -50,7 +51,7 @@ router.post("/register", (req, res) => {
             name: req.body.name,
             email: req.body.email,
             password: hashPassword,
-            role: req.body.role ? req.body.role : "User",
+            isAdmin: req.body.isAdmin ? req.body.isAdmin: false,
           },
           (err, data) => {
             if (err) {
@@ -67,7 +68,6 @@ router.post("/register", (req, res) => {
 });
 
 // User Login
-
 router.post("/login", (req, res) => {
   User.findOne({ email: req.body.email }, (err, user) => {
     if (err) {
@@ -90,5 +90,17 @@ router.post("/login", (req, res) => {
     }
   });
 });
+
+// User information for self
+router.get('/profile', verifyUser, (req, res) => {
+    User.findOne({"_id":req.user.id}, (err, user) => {
+        console.log(user)
+        res.status(200).send({
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin
+        })
+    })
+})
 
 module.exports = router;
