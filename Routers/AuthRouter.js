@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../Model/UserSchema");
-const defResponse = require("../Response/Default")
+const defResponse = require("../Response/Default");
 // import defResponse from "../Response/Default"
 const { transformError } = require("../Response/Errors");
 
@@ -25,7 +25,8 @@ router.get("/users", (req, res) => {
 
 // Register a user
 router.post("/register", (req, res) => {
-  if (!req.body.password) return res.status(400).send("Bad Request - Password is missing");
+  if (!req.body.password)
+    return res.status(400).send(defResponse.RES_PASSWORD_MISSING);
   User.findOne(
     {
       email: req.body.email,
@@ -34,42 +35,45 @@ router.post("/register", (req, res) => {
       if (err)
         return res
           .status(500)
-          .send("Request to register failed due to server issue");
-      if (user)
-        return res.status(409).send(transformError(defResponse.RES_USER_EXIST));
-    }
-  );
-
-  let hashPassword = bcrypt.hashSync(req.body.password, 8);
-  User.create(
-    {
-      name: req.body.name,
-      email: req.body.email,
-      password: hashPassword,
-      role: req.body.role ? req.body.role : "User",
-    },
-    (err, data) => {
-      if (err) {
-        return res
-          .status(500)
-          .send("Request to register failed due to server issue");
+          .send(transformError(defResponse.RES_SERVER_ERROR, err));
+      if (user) {
+        return res.status(409).send(defResponse.RES_USER_EXIST);
+      } else {
+        let hashPassword = bcrypt.hashSync(req.body.password, 8);
+        User.create(
+          {
+            name: req.body.name,
+            email: req.body.email,
+            password: hashPassword,
+            role: req.body.role ? req.body.role : "User",
+          },
+          (err, data) => {
+            if (err) {
+              return res
+                .status(500)
+                .send(transformError(defResponse.RES_SERVER_ERROR, err));
+            }
+            res.status(200).send(defResponse.RES_REGISTRATION_SUCCESS);
+          }
+        );
       }
-      res
-        .status(200)
-        .send({ message: "Regisration Successfull", redirect: `/login` });
     }
   );
 });
 
-
 // User Login
 
-router.post('/login', (req, res) => {
-    User.findOne({ email: req.body.email}, (err, user) => {
-        if(err) return res.status(500).send("Request to register failed due to server issue");
-
-    })
-})
-
+router.post("/login", (req, res) => {
+  User.findOne({ email: req.body.email }, (err, user) => {
+    if (err) {
+      return res
+        .status(500)
+        .send(transformError(defResponse.RES_SERVER_ERROR, err));
+    }
+    if (!user) {
+      return res.status(404).send();
+    }
+  });
+});
 
 module.exports = router;
