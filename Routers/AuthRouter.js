@@ -181,29 +181,19 @@ router.post("/addtocart", verifyUser, (req, res) => {
           }
         );
       }
+    } else {
+      // create cart 
+      Cart.create(itemToBeAdded, (err, result) => {
+        if (err) {
+          console.log(err);
+          return res
+            .status(400)
+            .send(transformError(defResponse.RES_CART_ERR, err));
+        }
+        res.status(200).send("Cart Created");
+      });
     }
   });
-  // check if user has a cart already -- done
-  //yes--
-  // check if cart has that item already -- done
-  // //  yes - update count -- done
-  // //  no - insert -- done
-  //no--
-  // create cart and add item
 });
-
-//   (err,result) => {
-//   if (err)
-//     return res
-//       .send(400)
-//       .send(transformError(defResponse.RES_ADD_TO_CART_FAILD, err));
-//   else if (!result){
-//     // add new
-//   } else {
-//     // update existing
-//   }
-// }
-// );
-// });
 
 module.exports = router;
