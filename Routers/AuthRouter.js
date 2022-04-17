@@ -116,7 +116,7 @@ router.get("/cart", verifyUser, (req, res) => {
 });
 
 // add to cart - using token ( Authenticated Call )
-router.post("/addtocart", verifyUser, (req, res) => {
+router.post("/cartadditem", verifyUser, (req, res) => {
   const itemToBeAdded = {
     userId: req.user.id,
     itemList: [
@@ -144,7 +144,6 @@ router.post("/addtocart", verifyUser, (req, res) => {
             userId: req.user.id,
             "itemList.id": req.body.item_id,
           },
-          // { upsert: true },
           {
             $inc: {
               "itemList.$.quantity": req.body.quantity,
@@ -161,6 +160,7 @@ router.post("/addtocart", verifyUser, (req, res) => {
         );
       } else {
         Cart.updateOne(
+          
           {
             userId: req.user.id,
           },
@@ -170,19 +170,20 @@ router.post("/addtocart", verifyUser, (req, res) => {
             },
             $inc: {
               total: req.body.quantity * req.body.price,
-            }
+            },
           },
           (err, result) => {
             if (err)
               return res
                 .status(400)
                 .send(transformError(defResponse.RES_CART_ERR, err));
+            console.log(result)
             res.status(200).send(result);
           }
         );
       }
     } else {
-      // create cart 
+      // create cart
       Cart.create(itemToBeAdded, (err, result) => {
         if (err) {
           console.log(err);
@@ -194,6 +195,24 @@ router.post("/addtocart", verifyUser, (req, res) => {
       });
     }
   });
+});
+
+// remove from cart - using token ( Authenticated Call )
+router.post("/cartremoveitem", verifyUser, (req, res) => {
+  Cart.updateOne(
+    { userId: req.user.id },
+    {
+      $pull: { itemList: { "_id": req.body._id } },
+    },
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      }
+      res.status(200).send(result);
+    }
+  );
 });
 
 module.exports = router;
