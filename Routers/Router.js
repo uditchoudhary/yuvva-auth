@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../Model/UserSchema");
+const { append } = require("express/lib/response");
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());

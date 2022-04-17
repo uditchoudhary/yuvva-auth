@@ -14,6 +14,7 @@ module.exports = (req, res, next) => {
         .status(500)
         .send(transformError(defResponse.RES_SERVER_ERROR, err));
     } else {
+      console.log("AuthVerifyAdmin", user)
       if (!user.isAdmin) {
         return res.status(404).send("Access Denied");
       }

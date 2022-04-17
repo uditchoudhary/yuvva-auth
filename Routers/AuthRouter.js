@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../Model/UserSchema");
+const Cart = require("../Model/CartSchema");
+
 const defResponse = require("../Response/Default");
 // import defResponse from "../Response/Default"
 const { transformError } = require("../Response/Errors");
@@ -51,8 +53,8 @@ router.post("/register", (req, res) => {
             name: req.body.name,
             email: req.body.email,
             password: hashPassword,
-            isAdmin: req.body.isAdmin ? req.body.isAdmin: false,
-            phone: req.body.phone
+            isAdmin: req.body.isAdmin ? req.body.isAdmin : false,
+            phone: req.body.phone,
           },
           (err, data) => {
             if (err) {
@@ -84,7 +86,7 @@ router.post("/login", (req, res) => {
         return res.status(401).send(defResponse.RES_USER_UNAUTHORISED);
       else {
         let jwtToken = jwt.sign({ id: user._id }, secret, {
-          expiresIn: 1800000,
+          expiresIn: "1800s",
         });
         res.status(200).send({ auth: true, token: jwtToken });
       }
@@ -93,15 +95,115 @@ router.post("/login", (req, res) => {
 });
 
 // User information for self
-router.get('/profile', verifyUser, (req, res) => {
-    User.findOne({"_id":req.user.id}, (err, user) => {
-        res.status(200).send({
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            isAdmin: user.isAdmin
-        })
-    })
-})
+router.get("/profile", verifyUser, (req, res) => {
+  User.findOne({ _id: req.user.id }, (err, user) => {
+    res.status(200).send({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+    });
+  });
+});
+
+// get Cart information - using token ( Authenticated Call )
+router.get("/cart", verifyUser, (req, res) => {
+  Cart.findOne({ userId: req.user.id }, (err, result) => {
+    if (err)
+      return res.send(400).send(transformError(defResponse.RES_CART_ERR, err));
+    res.status(200).send(result);
+  });
+});
+
+// add to cart - using token ( Authenticated Call )
+router.post("/addtocart", verifyUser, (req, res) => {
+  const itemToBeAdded = {
+    userId: req.user.id,
+    itemList: [
+      {
+        name: req.body.item_name,
+        quantity: req.body.quantity,
+        id: req.body.item_id,
+        _id: req.body._id,
+        size: req.body.size,
+        price: req.body.price,
+      },
+    ],
+  };
+  Cart.findOne({ userId: req.user.id }, (err, result) => {
+    if (err)
+      return res
+        .status(400)
+        .send(transformError(defResponse.RES_CART_ERR, err));
+    if (result) {
+      console.log(result);
+      const obj = result.itemList.find((item) => item._id === req.body._id);
+      if (obj) {
+        Cart.updateOne(
+          {
+            userId: req.user.id,
+            "itemList.id": req.body.item_id,
+          },
+          // { upsert: true },
+          {
+            $inc: {
+              "itemList.$.quantity": req.body.quantity,
+              total: req.body.quantity * req.body.price,
+            },
+          },
+          (err, result) => {
+            if (err)
+              return res
+                .status(400)
+                .send(transformError(defResponse.RES_CART_ERR, err));
+            return res.status(200).send(result);
+          }
+        );
+      } else {
+        Cart.updateOne(
+          {
+            userId: req.user.id,
+          },
+          {
+            $push: {
+              itemList: itemToBeAdded.itemList[0],
+            },
+            $inc: {
+              total: req.body.quantity * req.body.price,
+            }
+          },
+          (err, result) => {
+            if (err)
+              return res
+                .status(400)
+                .send(transformError(defResponse.RES_CART_ERR, err));
+            res.status(200).send(result);
+          }
+        );
+      }
+    }
+  });
+  // check if user has a cart already -- done
+  //yes--
+  // check if cart has that item already -- done
+  // //  yes - update count -- done
+  // //  no - insert -- done
+  //no--
+  // create cart and add item
+});
+
+//   (err,result) => {
+//   if (err)
+//     return res
+//       .send(400)
+//       .send(transformError(defResponse.RES_ADD_TO_CART_FAILD, err));
+//   else if (!result){
+//     // add new
+//   } else {
+//     // update existing
+//   }
+// }
+// );
+// });
 
 module.exports = router;
