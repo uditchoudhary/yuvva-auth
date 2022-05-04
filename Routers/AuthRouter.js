@@ -19,6 +19,19 @@ router.use(bodyParser.json());
 
 let secret = process.env.jwtSeceret;
 
+router.all("/*", function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "content-type,x-request-application,x-otp,sid "
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,OPTION,PATCH"
+  );
+  next();
+});
+
 router.get("/", (req, res) => {
   res.send("Hello! Welcome to auth router");
 });
