@@ -17,13 +17,13 @@ mongoose.connect(process.env.mongoDbUrl);
 
 let port = process.env.PORT || 8230;
 
-// // CORS (Cross-Origin Resource Sharing) headers to support Cross-site HTTP requests
-// app.all("*", (req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "https://localhost:3000");
-//   next();
-// });
+// CORS (Cross-Origin Resource Sharing) headers to support Cross-site HTTP requests
+app.all("*", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://localhost:3000");
+  next();
+});
 
-app.use(cors(corsOptions));
+app.use(cors());
 app.use("/api/auth", authRouter);
 app.use("/api/", router);
 
