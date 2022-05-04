@@ -12,7 +12,8 @@ mongoose.connect(process.env.mongoDbUrl);
 let port = process.env.PORT || 8230;
 
 // app.use(cors({ origin: true, credentials: true }));
-app.options("*", cors());
+// app.options("*", cors());
+app.use(cors());
 app.use("/api/auth", authRouter);
 app.use("/api/", router);
 
