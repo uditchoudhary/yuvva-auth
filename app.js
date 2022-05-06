@@ -11,11 +11,10 @@ dotenv.config();
 mongoose.connect(process.env.mongoDbUrl);
 
 let port = process.env.PORT || 8230;
-
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000", "http://yuvva.herokuapp.com/"],
+    origin: process.env.allowDomain,
   })
 );
 app.use(cookieParser());
