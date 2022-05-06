@@ -70,6 +70,17 @@ router.post("/register", (req, res) => {
   );
 });
 
+const generateAccessToken = (_id) => {
+  return jwt.sign({ id: _id }, secret, {
+    expiresIn: 1000 * 60 * 24 * process.env.jwtTokenExpireTimeInDays,
+  });
+};
+
+// User logout
+router.get("/logout", (req, res) => {
+  res.status(200).clearCookie("token").send({ success: true });
+});
+
 // User Login
 router.post("/login", (req, res) => {
   User.findOne({ email: req.body.email }, (err, user) => {
@@ -85,10 +96,13 @@ router.post("/login", (req, res) => {
       if (!passValidity)
         return res.status(401).send(defResponse.RES_USER_UNAUTHORISED);
       else {
-        let jwtToken = jwt.sign({ id: user._id }, secret, {
-          expiresIn: "1800s",
-        });
-        res.status(200).send({ auth: true, token: jwtToken });
+        let accessToken = generateAccessToken(user._id);
+        res
+          .status(200)
+          .cookie("token", accessToken, {
+            httpOnly: true,
+          })
+          .send({ success: true });
       }
     }
   });
@@ -160,7 +174,6 @@ router.post("/cartadditem", verifyUser, (req, res) => {
         );
       } else {
         Cart.updateOne(
-          
           {
             userId: req.user.id,
           },
@@ -177,7 +190,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
               return res
                 .status(400)
                 .send(transformError(defResponse.RES_CART_ERR, err));
-            console.log(result)
+            console.log(result);
             res.status(200).send(result);
           }
         );
@@ -202,7 +215,7 @@ router.post("/cartremoveitem", verifyUser, (req, res) => {
   Cart.updateOne(
     { userId: req.user.id },
     {
-      $pull: { itemList: { "_id": req.body._id } },
+      $pull: { itemList: { _id: req.body._id } },
     },
     (err, result) => {
       if (err) {

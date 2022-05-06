@@ -27,13 +27,18 @@ const RES_USER_UNAUTHORISED = {
   redirect: "/register",
 };
 
+const RES_ACCESS_DENIED_NO_TOKEN = {
+  statusText: "ACCESS_DENIED",
+  redirect: "/login",
+};
+
 const RES_CART_ERR = {
   statusText: "FAILED_TO_FETCH_CART",
-}
+};
 
 const RES_ADD_TO_CART_FAILD = {
-  statusText: "ADD_TO_CART_FAILURE"
-}
+  statusText: "ADD_TO_CART_FAILURE",
+};
 
 module.exports = {
   RES_USER_EXIST,
@@ -43,4 +48,5 @@ module.exports = {
   RES_USER_NOT_EXIST,
   RES_USER_UNAUTHORISED,
   RES_ADD_TO_CART_FAILD,
+  RES_ACCESS_DENIED_NO_TOKEN,
 };
