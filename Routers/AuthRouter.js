@@ -101,6 +101,7 @@ router.post("/login", (req, res) => {
           .status(200)
           .cookie("token", accessToken, {
             httpOnly: true,
+            path: "/"
           })
           .send({ success: true });
       }
