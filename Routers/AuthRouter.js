@@ -103,6 +103,7 @@ router.post("/login", (req, res) => {
             httpOnly: true,
             path: "/"
           })
+          .header({"access-control-expose-headers": "Set-Cookie"})
           .send({ success: true });
       }
     }
