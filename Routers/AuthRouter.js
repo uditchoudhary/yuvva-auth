@@ -101,9 +101,9 @@ router.post("/login", (req, res) => {
           .status(200)
           .cookie("token", accessToken, {
             httpOnly: true,
-            path: "/"
+            path: "/",
           })
-          .header({"access-control-expose-headers": '*'})
+          .header({ "access-control-expose-headers": process.env.allowDomain })
           .send({ success: true });
       }
     }
