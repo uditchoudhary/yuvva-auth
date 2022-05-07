@@ -99,21 +99,11 @@ router.post("/login", (req, res) => {
         let accessToken = generateAccessToken(user._id);
         res
           .status(200)
-          .cookie(
-            "token",
-            accessToken,
-            { sameSite: "none", secure: true, httpOnly: true }
-            // {
-            //   secure: process.env.NODE_ENV !== "dev",
-            //   httpOnly: true,
-            //   // path: "/",
-            //   SameSite: "None",
-            //   secure: true,
-            //   // domain: process.env.allowDomain,
-            //   // domain: ".herokuapp.com"
-            // }
-          )
-          // .header({ "access-control-expose-headers": process.env.allowDomain })
+          .cookie("token", accessToken, {
+            sameSite: "none",
+            secure: process.env.NODE_ENV !== "dev",
+            httpOnly: true,
+          })
           .send({ success: true });
       }
     }
