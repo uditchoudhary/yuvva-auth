@@ -101,11 +101,11 @@ router.post("/login", (req, res) => {
           .status(200)
           .cookie("token", accessToken, {
             secure: process.env.NODE_ENV !== "dev",
-            // httpOnly: true,
+            httpOnly: true,
             path: "/",
             SameSite: "lax",
             // domain: process.env.allowDomain,
-            domain: ".herokuapp.com"
+            // domain: ".herokuapp.com"
           })
           // .header({ "access-control-expose-headers": process.env.allowDomain })
           .send({ success: true });
