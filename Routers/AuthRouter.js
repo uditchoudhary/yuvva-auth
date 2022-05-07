@@ -54,6 +54,7 @@ router.post("/register", (req, res) => {
             password: hashPassword,
             isAdmin: req.body.isAdmin ? req.body.isAdmin : false,
             phone: req.body.phone,
+            address: req.body.address ? req.body.isAdmin : "",
           },
           (err, data) => {
             if (err) {
@@ -112,13 +113,52 @@ router.post("/login", (req, res) => {
 // User information for self
 router.get("/profile", verifyUser, (req, res) => {
   User.findOne({ _id: req.user.id }, (err, user) => {
+      if (!user)
+        return res
+          .status(404)
+          .send(transformError(defResponse.RES_USER_NOT_EXIST));
+
+    const { name, email, phone, isAdmin, address } = user;
     res.status(200).send({
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      isAdmin: user.isAdmin,
+      name,
+      email,
+      phone,
+      isAdmin,
+      address,
     });
   });
+});
+
+// User update / add address
+router.post("/updateAddress", verifyUser, (req, res) => {
+  console.log(req.body.address, req.user.id);
+  User.findOneAndUpdate(
+    {
+      _id: req.user.id,
+    },
+    {
+      "address": req.body.address,
+    },
+    {
+      returnNewDocument: true
+    },
+    (err, result) => {
+      if (err)
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      if (!result) return res.status(404).send(transformError(defResponse.RES_USER_NOT_EXIST))
+      console.log(result)
+      const { name, email, phone, isAdmin, address } = result;
+      return res.status(200).send({
+        name,
+        email,
+        phone,
+        isAdmin,
+        address,
+      });
+    }
+  );
 });
 
 // get Cart information - using token ( Authenticated Call )
