@@ -7,7 +7,6 @@ const User = require("../Model/UserSchema");
 const Cart = require("../Model/CartSchema");
 
 const defResponse = require("../Response/Default");
-// import defResponse from "../Response/Default"
 const { transformError } = require("../Response/Errors");
 const dotenv = require("dotenv");
 const verifyUser = require("../Middlewares/AuthVerifyUser");
