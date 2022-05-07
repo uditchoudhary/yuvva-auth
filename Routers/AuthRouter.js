@@ -102,7 +102,7 @@ router.post("/login", (req, res) => {
           .cookie(
             "token",
             accessToken,
-            { sameSite: "none", secure: true },
+            { sameSite: "none", secure: true, httpOnly: true }
             // {
             //   secure: process.env.NODE_ENV !== "dev",
             //   httpOnly: true,
