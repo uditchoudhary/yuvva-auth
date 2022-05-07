@@ -102,7 +102,7 @@ router.post("/login", (req, res) => {
           .cookie("token", accessToken, {
             // secure: process.env.NODE_ENV !== "dev",
             // httpOnly: true,
-            path: "/",
+            // path: "/",
           })
           // .header({ "access-control-expose-headers": process.env.allowDomain })
           .send({ success: true });
