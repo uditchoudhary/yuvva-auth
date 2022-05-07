@@ -100,7 +100,7 @@ router.post("/login", (req, res) => {
         res
           .status(200)
           .cookie("token", accessToken, {
-            secure: process.env.NODE_ENV !== "development",
+            secure: process.env.NODE_ENV !== "dev",
             httpOnly: true,
             path: "/",
           })
