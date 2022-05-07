@@ -104,6 +104,7 @@ router.post("/login", (req, res) => {
             // httpOnly: true,
             // path: "/",
             SameSite: "None",
+            domain: process.env.allowDomain,
           })
           // .header({ "access-control-expose-headers": process.env.allowDomain })
           .send({ success: true });
