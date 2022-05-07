@@ -15,7 +15,7 @@ console.log("Domain allowed ", process.env.allowDomain);
 app.use(
   cors({
     credentials: true,
-    origin: ".herokuapp.com",
+    origin: "*",
     // origin: true
   })
 );
