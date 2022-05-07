@@ -103,6 +103,7 @@ router.post("/login", (req, res) => {
             // secure: process.env.NODE_ENV !== "dev",
             // httpOnly: true,
             // path: "/",
+            sameSite: None
           })
           // .header({ "access-control-expose-headers": process.env.allowDomain })
           .send({ success: true });
