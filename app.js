@@ -15,8 +15,8 @@ console.log("Domain allowed ", process.env.allowDomain);
 app.use(
   cors({
     credentials: true,
-    // origin: process.env.allowDomain,
-    origin: true
+    origin: process.env.allowDomain,
+    // origin: true
   })
 );
 app.use(cookieParser());
