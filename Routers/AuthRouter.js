@@ -100,11 +100,11 @@ router.post("/login", (req, res) => {
         res
           .status(200)
           .cookie("token", accessToken, {
-            secure: process.env.NODE_ENV !== "dev",
+            // secure: process.env.NODE_ENV !== "dev",
             // httpOnly: true,
             path: "/",
           })
-          .header({ "access-control-expose-headers": process.env.allowDomain })
+          // .header({ "access-control-expose-headers": process.env.allowDomain })
           .send({ success: true });
       }
     }
