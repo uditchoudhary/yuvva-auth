@@ -103,7 +103,7 @@ router.post("/login", (req, res) => {
             secure: process.env.NODE_ENV !== "dev",
             httpOnly: true,
             path: "/",
-            SameSite: "lax",
+            SameSite: "None",
             // domain: process.env.allowDomain,
             // domain: ".herokuapp.com"
           })
