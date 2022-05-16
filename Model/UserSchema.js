@@ -1,5 +1,20 @@
 const mongoose = require("mongoose");
 
+const AddressSchema = new mongoose.Schema({
+  line1: {
+    type: String,
+    required: false,
+  },
+  line2: {
+    type: String,
+    required: false,
+  },
+  line3: {
+    type: String,
+    required: false,
+  },
+});
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -23,7 +38,7 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
   address: {
-    type: String,
+    type: AddressSchema,
     required: false,
   },
 });

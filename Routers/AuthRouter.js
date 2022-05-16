@@ -54,7 +54,7 @@ router.post("/register", (req, res) => {
             password: hashPassword,
             isAdmin: req.body.isAdmin ? req.body.isAdmin : false,
             phone: req.body.phone,
-            address: req.body.address ? req.body.isAdmin : "",
+            address: req.body.address ? req.body.address : undefined,
           },
           (err, data) => {
             if (err) {
@@ -113,12 +113,13 @@ router.post("/login", (req, res) => {
 // User information for self
 router.get("/profile", verifyUser, (req, res) => {
   User.findOne({ _id: req.user.id }, (err, user) => {
-      if (!user)
-        return res
-          .status(404)
-          .send(transformError(defResponse.RES_USER_NOT_EXIST));
+    if (!user)
+      return res
+        .status(404)
+        .send(transformError(defResponse.RES_USER_NOT_EXIST));
 
     const { name, email, phone, isAdmin, address } = user;
+
     res.status(200).send({
       name,
       email,
@@ -131,24 +132,35 @@ router.get("/profile", verifyUser, (req, res) => {
 
 // User update / add address
 router.post("/updateAddress", verifyUser, (req, res) => {
-  console.log(req.body.address, req.user.id);
+  // console.log("Request: ", req.body.address, req.user.id);
+  console.log("Request: ", req.body.address.addressLine1);
+  console.log("Request: ", req.body.address.addressLine2);
+  console.log("Request: ", req.body.address.addressLine3);
+
   User.findOneAndUpdate(
     {
       _id: req.user.id,
     },
     {
-      "address": req.body.address,
+      "address.line1": req.body.address.line1,
+      "address.line2": req.body.address.line2,
+      "address.line3": req.body.address.line3,
     },
     {
-      returnNewDocument: true
+      new: true,
     },
     (err, result) => {
-      if (err)
+      if (err) {
+        console.log("Error - ", err);
         return res
           .status(400)
           .send(transformError(defResponse.RES_CART_ERR, err));
-      if (!result) return res.status(404).send(transformError(defResponse.RES_USER_NOT_EXIST))
-      console.log(result)
+      }
+      if (!result)
+        return res
+          .status(404)
+          .send(transformError(defResponse.RES_USER_NOT_EXIST));
+      console.log("Address result", result);
       const { name, email, phone, isAdmin, address } = result;
       return res.status(200).send({
         name,
