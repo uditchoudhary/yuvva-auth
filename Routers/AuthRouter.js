@@ -173,6 +173,54 @@ router.post("/updateAddress", verifyUser, (req, res) => {
   );
 });
 
+// User update / update details
+router.post("/updateUserDetails", verifyUser, (req, res) => {
+  // console.log("Request: ", req.body.address, req.user.id);
+  console.log("Request: ", req.body.name);
+  console.log("Request: ", req.body.email);
+  console.log("Request: ", req.body.phone);
+  console.log("Request: ", req.body.line1);
+  console.log("Request: ", req.body.line2);
+  console.log("Request: ", req.body.line3);
+
+  User.findOneAndUpdate(
+    {
+      _id: req.user.id,
+    },
+    {
+      "name": req.body.name,
+      "phone": req.body.phone,
+      "address.line1": req.body.line1,
+      "address.line2": req.body.line2,
+      "address.line3": req.body.line3,
+    },
+    {
+      new: true,
+    },
+    (err, result) => {
+      if (err) {
+        console.log("Error - ", err);
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      }
+      if (!result)
+        return res
+          .status(404)
+          .send(transformError(defResponse.RES_USER_NOT_EXIST));
+      console.log("Address result", result);
+      const { name, email, phone, isAdmin, address } = result;
+      return res.status(200).send({
+        name,
+        email,
+        phone,
+        isAdmin,
+        address,
+      });
+    }
+  );
+});
+
 // get Cart information - using token ( Authenticated Call )
 router.get("/cart", verifyUser, (req, res) => {
   Cart.findOne({ userId: req.user.id }, (err, result) => {
