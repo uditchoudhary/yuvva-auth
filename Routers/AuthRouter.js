@@ -11,6 +11,7 @@ const { transformError } = require("../Response/Errors");
 const dotenv = require("dotenv");
 const verifyUser = require("../Middlewares/AuthVerifyUser");
 const verifyAdmin = require("../Middlewares/AuthVerifyAdmin");
+const { request } = require("express");
 dotenv.config();
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -132,11 +133,6 @@ router.get("/profile", verifyUser, (req, res) => {
 
 // User update / add address
 router.post("/updateAddress", verifyUser, (req, res) => {
-  // console.log("Request: ", req.body.address, req.user.id);
-  console.log("Request: ", req.body.address.addressLine1);
-  console.log("Request: ", req.body.address.addressLine2);
-  console.log("Request: ", req.body.address.addressLine3);
-
   User.findOneAndUpdate(
     {
       _id: req.user.id,
@@ -160,7 +156,6 @@ router.post("/updateAddress", verifyUser, (req, res) => {
         return res
           .status(404)
           .send(transformError(defResponse.RES_USER_NOT_EXIST));
-      console.log("Address result", result);
       const { name, email, phone, isAdmin, address } = result;
       return res.status(200).send({
         name,
@@ -175,21 +170,13 @@ router.post("/updateAddress", verifyUser, (req, res) => {
 
 // User update / update details
 router.post("/updateUserDetails", verifyUser, (req, res) => {
-  // console.log("Request: ", req.body.address, req.user.id);
-  console.log("Request: ", req.body.name);
-  console.log("Request: ", req.body.email);
-  console.log("Request: ", req.body.phone);
-  console.log("Request: ", req.body.line1);
-  console.log("Request: ", req.body.line2);
-  console.log("Request: ", req.body.line3);
-
   User.findOneAndUpdate(
     {
       _id: req.user.id,
     },
     {
-      "name": req.body.name,
-      "phone": req.body.phone,
+      name: req.body.name,
+      phone: req.body.phone,
       "address.line1": req.body.line1,
       "address.line2": req.body.line2,
       "address.line3": req.body.line3,
@@ -223,53 +210,61 @@ router.post("/updateUserDetails", verifyUser, (req, res) => {
 
 // get Cart information - using token ( Authenticated Call )
 router.get("/cart", verifyUser, (req, res) => {
+  console.log(req);
   Cart.findOne({ userId: req.user.id }, (err, result) => {
     if (err)
       return res.send(400).send(transformError(defResponse.RES_CART_ERR, err));
+    console.log("REsponse", res);
     res.status(200).send(result);
   });
 });
 
 // add to cart - using token ( Authenticated Call )
 router.post("/cartadditem", verifyUser, (req, res) => {
+  const {
+    item_name,
+    item_id,
+    productCategory_name,
+    category_name,
+    image,
+    size,
+    price,
+    quantity,
+    _id
+  } = req.body.item;
   const itemToBeAdded = {
     userId: req.user.id,
-    itemList: [
-      {
-        name: req.body.item_name,
-        quantity: req.body.quantity,
-        id: req.body.item_id,
-        _id: req.body._id,
-        size: req.body.size,
-        price: req.body.price,
-      },
-    ],
+    itemList: [req.body.item],
+    total: price * quantity
   };
   Cart.findOne({ userId: req.user.id }, (err, result) => {
-    if (err)
+    if (err) {
       return res
         .status(400)
         .send(transformError(defResponse.RES_CART_ERR, err));
+    }
     if (result) {
-      console.log(result);
-      const obj = result.itemList.find((item) => item._id === req.body._id);
+      const obj = result.itemList.find(
+        (item) => item.item_id === item_id
+      );
       if (obj) {
         Cart.updateOne(
           {
             userId: req.user.id,
-            "itemList.id": req.body.item_id,
+            "itemList.item_id": item_id,
           },
           {
             $inc: {
-              "itemList.$.quantity": req.body.quantity,
-              total: req.body.quantity * req.body.price,
+              "itemList.$.quantity": quantity,
+              total: quantity * price,
             },
           },
           (err, result) => {
-            if (err)
+            if (err) {
               return res
                 .status(400)
                 .send(transformError(defResponse.RES_CART_ERR, err));
+            }
             return res.status(200).send(result);
           }
         );
@@ -283,15 +278,15 @@ router.post("/cartadditem", verifyUser, (req, res) => {
               itemList: itemToBeAdded.itemList[0],
             },
             $inc: {
-              total: req.body.quantity * req.body.price,
+              total: quantity * price,
             },
           },
           (err, result) => {
-            if (err)
+            if (err) {
               return res
                 .status(400)
                 .send(transformError(defResponse.RES_CART_ERR, err));
-            console.log(result);
+            }
             res.status(200).send(result);
           }
         );
@@ -300,7 +295,6 @@ router.post("/cartadditem", verifyUser, (req, res) => {
       // create cart
       Cart.create(itemToBeAdded, (err, result) => {
         if (err) {
-          console.log(err);
           return res
             .status(400)
             .send(transformError(defResponse.RES_CART_ERR, err));

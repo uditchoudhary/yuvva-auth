@@ -1,20 +1,23 @@
 const mongoose = require("mongoose");
-const Item = require("./ItemSchema");
 
 const CartItemSchema = new mongoose.Schema({
-  name: {
+  item_name: {
     type: String,
     required: true,
   },
-  quantity: {
+  item_id: {
     type: Number,
     required: true,
   },
-  id: {
-    type: Number,
+  productCategory_name: {
+    type: String,
     required: true,
   },
-  _id: {
+  category_name: {
+    type: String,
+    required: true,
+  },
+  image: {
     type: String,
     required: true,
   },
@@ -23,6 +26,10 @@ const CartItemSchema = new mongoose.Schema({
     required: true,
   },
   price: {
+    type: Number,
+    required: true,
+  },
+  quantity: {
     type: Number,
     required: true,
   },
@@ -42,8 +49,8 @@ const CartSchema = new mongoose.Schema({
   ],
   total: {
     type: Number,
-    require: true
-  }
+    require: true,
+  },
 });
 
 module.exports = mongoose.model("Cart", CartSchema);
