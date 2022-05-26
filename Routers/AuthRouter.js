@@ -210,11 +210,9 @@ router.post("/updateUserDetails", verifyUser, (req, res) => {
 
 // get Cart information - using token ( Authenticated Call )
 router.get("/cart", verifyUser, (req, res) => {
-  console.log(req);
   Cart.findOne({ userId: req.user.id }, (err, result) => {
     if (err)
       return res.send(400).send(transformError(defResponse.RES_CART_ERR, err));
-    console.log("REsponse", res);
     res.status(200).send(result);
   });
 });
@@ -230,12 +228,12 @@ router.post("/cartadditem", verifyUser, (req, res) => {
     size,
     price,
     quantity,
-    _id
+    _id,
   } = req.body.item;
   const itemToBeAdded = {
     userId: req.user.id,
     itemList: [req.body.item],
-    total: price * quantity
+    total: price * quantity,
   };
   Cart.findOne({ userId: req.user.id }, (err, result) => {
     if (err) {
@@ -244,11 +242,9 @@ router.post("/cartadditem", verifyUser, (req, res) => {
         .send(transformError(defResponse.RES_CART_ERR, err));
     }
     if (result) {
-      const obj = result.itemList.find(
-        (item) => item.item_id === item_id
-      );
+      const obj = result.itemList.find((item) => item.item_id === item_id);
       if (obj) {
-        Cart.updateOne(
+        Cart.findOneAndUpdate(
           {
             userId: req.user.id,
             "itemList.item_id": item_id,
@@ -259,6 +255,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
               total: quantity * price,
             },
           },
+          { new: true },
           (err, result) => {
             if (err) {
               return res
@@ -269,7 +266,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
           }
         );
       } else {
-        Cart.updateOne(
+        Cart.findOneAndUpdate(
           {
             userId: req.user.id,
           },
@@ -281,6 +278,8 @@ router.post("/cartadditem", verifyUser, (req, res) => {
               total: quantity * price,
             },
           },
+          { new: true },
+
           (err, result) => {
             if (err) {
               return res
@@ -299,7 +298,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
             .status(400)
             .send(transformError(defResponse.RES_CART_ERR, err));
         }
-        res.status(200).send("Cart Created");
+        res.status(200).send(result);
       });
     }
   });
