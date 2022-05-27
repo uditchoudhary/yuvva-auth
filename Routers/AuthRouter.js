@@ -230,9 +230,11 @@ router.post("/cartadditem", verifyUser, (req, res) => {
     quantity,
     _id,
   } = req.body.item;
+  const itemList = req.body.item;
+  itemList.totalCost = price * quantity
   const itemToBeAdded = {
     userId: req.user.id,
-    itemList: [req.body.item],
+    itemList: [itemList],
     total: price * quantity,
   };
   Cart.findOne({ userId: req.user.id }, (err, result) => {
@@ -252,6 +254,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
           {
             $inc: {
               "itemList.$.quantity": quantity,
+              "itemList.$.totalCost": price * quantity,
               total: quantity * price,
             },
           },
@@ -306,11 +309,12 @@ router.post("/cartadditem", verifyUser, (req, res) => {
 
 // remove from cart - using token ( Authenticated Call )
 router.post("/cartremoveitem", verifyUser, (req, res) => {
-  Cart.updateOne(
+  Cart.findOneAndUpdate(
     { userId: req.user.id },
     {
       $pull: { itemList: { _id: req.body._id } },
     },
+    { new: true },
     (err, result) => {
       if (err) {
         return res
@@ -318,6 +322,22 @@ router.post("/cartremoveitem", verifyUser, (req, res) => {
           .send(transformError(defResponse.RES_CART_ERR, err));
       }
       res.status(200).send(result);
+    }
+  );
+});
+
+// delete cart - using token ( Authenticated Call )
+router.post("/deleteCart", verifyUser, (req, res) => {
+  Cart.findOneAndDelete(
+    { userId: req.user.id },
+    { new: true },
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      }
+      res.status(200).send({});
     }
   );
 });
