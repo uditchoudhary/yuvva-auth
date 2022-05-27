@@ -309,10 +309,16 @@ router.post("/cartadditem", verifyUser, (req, res) => {
 
 // remove from cart - using token ( Authenticated Call )
 router.post("/cartremoveitem", verifyUser, (req, res) => {
+  const {_id, price, quantity} = req.body;
   Cart.findOneAndUpdate(
     { userId: req.user.id },
     {
-      $pull: { itemList: { _id: req.body._id } },
+      $pull: { itemList: { _id: 
+        
+        _id } },
+      $inc: {
+        total: -(quantity * price),
+      },
     },
     { new: true },
     (err, result) => {
@@ -338,6 +344,21 @@ router.post("/deleteCart", verifyUser, (req, res) => {
           .send(transformError(defResponse.RES_CART_ERR, err));
       }
       res.status(200).send({});
+    }
+  );
+});
+
+// get cart total items and cost - using token ( Authenticated Call )
+router.post("/getTotalCart", verifyUser, (req, res) => {
+  Cart.findOne(
+    { userId: req.user.id },
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      }
+      res.status(200).send(result);
     }
   );
 });
