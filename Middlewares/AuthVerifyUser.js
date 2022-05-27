@@ -16,9 +16,7 @@ module.exports = async (req, res, next) => {
   const tokenCookie = authHeader
     .split(";")
     .filter((cookie) => cookie.split("=")[0].replace(" ", "") === "token");
-  console.log("Auth header ", authHeader.split(";"));
   const token = tokenCookie.toString().split("=")[1];
-  console.log("Auth tokenCookie ", tokenCookie);
 
   if (!token)
     return res

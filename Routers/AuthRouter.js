@@ -242,7 +242,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
         .send(transformError(defResponse.RES_CART_ERR, err));
     }
     if (result) {
-      const obj = result.itemList.find((item) => item.item_id === item_id);
+      const obj = result.itemList.find((item) => item.item_id === Number(item_id));
       if (obj) {
         Cart.findOneAndUpdate(
           {
