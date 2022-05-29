@@ -101,11 +101,11 @@ router.post("/login", (req, res) => {
         res
           .status(200)
           .cookie("token", accessToken, {
-            domain: ".herokuapp.com",
+            domain: "yuvva.herokuapp.com",
             sameSite: "none",
-            // secure: true,
-            // httpOnly: true,
-            maxAge: 24 * 60 * 60 * 100,
+            secure: true,
+            httpOnly: true,
+            // maxAge: 24 * 60 * 60 * 100,
           })
           .send({ success: true });
       }
