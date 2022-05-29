@@ -101,7 +101,7 @@ router.post("/login", (req, res) => {
         res
           .status(200)
           .cookie("token", accessToken, {
-            domain: "yuvva.herokuapp.com",
+            domain: ".yuvva.herokuapp.com",
             sameSite: "none",
             // secure: true,
             // httpOnly: true,
