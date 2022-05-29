@@ -103,8 +103,8 @@ router.post("/login", (req, res) => {
           .cookie("token", accessToken, {
             domain: ".herokuapp.com",
             sameSite: "none",
-            secure: true,
-            httpOnly: true,
+            // secure: true,
+            // httpOnly: true,
             maxAge: 24 * 60 * 60 * 100,
           })
           .send({ success: true });
