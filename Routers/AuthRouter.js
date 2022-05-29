@@ -101,7 +101,7 @@ router.post("/login", (req, res) => {
         res
           .status(200)
           .cookie("token", accessToken, {
-            domain: process.env.allowDomain,
+            domain: ".herokuapp.com",
             path: "/",
             sameSite: "Lax",
             secure: true,
