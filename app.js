@@ -17,7 +17,7 @@ app.use(
     credentials: true,
     origin: process.env.allowDomain,
     origin: true
-  })
+  }) 
 );
 app.use(cookieParser());
 app.use(function (req, res, next) {

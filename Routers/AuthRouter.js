@@ -101,10 +101,12 @@ router.post("/login", (req, res) => {
         res
           .status(200)
           .cookie("token", accessToken, {
-            sameSite: "none",
+            domain: process.env.allowDomain,
+            path: "/",
+            sameSite: "Lax",
             secure: true,
             httpOnly: true,
-            // maxAge: 24 * 60 * 60 * 100,
+            maxAge: 24 * 60 * 60 * 100,
           })
           .send({ success: true });
       }
