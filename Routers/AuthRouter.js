@@ -231,7 +231,7 @@ router.post("/cartadditem", verifyUser, (req, res) => {
     _id,
   } = req.body.item;
   const itemList = req.body.item;
-  itemList.totalCost = price * quantity
+  itemList.totalCost = price * quantity;
   const itemToBeAdded = {
     userId: req.user.id,
     itemList: [itemList],
@@ -244,7 +244,9 @@ router.post("/cartadditem", verifyUser, (req, res) => {
         .send(transformError(defResponse.RES_CART_ERR, err));
     }
     if (result) {
-      const obj = result.itemList.find((item) => item.item_id === Number(item_id));
+      const obj = result.itemList.find(
+        (item) => item.item_id === Number(item_id)
+      );
       if (obj) {
         Cart.findOneAndUpdate(
           {
@@ -309,13 +311,11 @@ router.post("/cartadditem", verifyUser, (req, res) => {
 
 // remove from cart - using token ( Authenticated Call )
 router.post("/cartremoveitem", verifyUser, (req, res) => {
-  const {_id, price, quantity} = req.body;
+  const { _id, price, quantity } = req.body;
   Cart.findOneAndUpdate(
     { userId: req.user.id },
     {
-      $pull: { itemList: { _id: 
-        
-        _id } },
+      $pull: { itemList: { _id: _id } },
       $inc: {
         total: -(quantity * price),
       },
@@ -330,6 +330,67 @@ router.post("/cartremoveitem", verifyUser, (req, res) => {
       res.status(200).send(result);
     }
   );
+});
+
+// update cart item
+router.post("/cartupdateitem", verifyUser, (req, res) => {
+  const { item_id, price, quantity } = req.body;
+  const itemList = req.body;
+  itemList.totalCost = price * quantity;
+
+  Cart.findOne({ userId: req.user.id }, (err, result) => {
+    // Failed to fetch cart
+    if (err) {
+      return res
+        .status(400)
+        .send(transformError(defResponse.RES_CART_ERR, err));
+    }
+    // user found
+    if (result) {
+      const obj = result.itemList.find(
+        (item) => item.item_id === Number(item_id)
+      );
+      // Obj is the item we need to update
+      if (obj) {
+        const oldTotal = result.total
+        const oldItemTotalCost = obj.totalCost;
+        const newItemTotalCost = price * quantity;
+        const newTotal = oldTotal - oldItemTotalCost + newItemTotalCost
+        Cart.findOneAndUpdate(
+          {
+            userId: req.user.id,
+            "itemList.item_id": item_id,
+          },
+          {
+            $set: {
+              "itemList.$.quantity": quantity,
+              "itemList.$.totalCost": price * quantity,
+              total: newTotal
+            },
+          },
+          { new: true },
+          (err, result) => {
+            if (err) {
+              return res
+                .status(400)
+                .send(transformError(defResponse.RES_CART_ERR, err));
+            }
+            return res.status(200).send(result);
+          }
+        );
+      } else {
+        // item not in cart - throw error
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      }
+    } else {
+      // cart not found - throw error
+      return res
+        .status(400)
+        .send(transformError(defResponse.RES_CART_ERR, err));
+    }
+  });
 });
 
 // delete cart - using token ( Authenticated Call )
@@ -350,17 +411,14 @@ router.post("/deleteCart", verifyUser, (req, res) => {
 
 // get cart total items and cost - using token ( Authenticated Call )
 router.post("/getTotalCart", verifyUser, (req, res) => {
-  Cart.findOne(
-    { userId: req.user.id },
-    (err, result) => {
-      if (err) {
-        return res
-          .status(400)
-          .send(transformError(defResponse.RES_CART_ERR, err));
-      }
-      res.status(200).send(result);
+  Cart.findOne({ userId: req.user.id }, (err, result) => {
+    if (err) {
+      return res
+        .status(400)
+        .send(transformError(defResponse.RES_CART_ERR, err));
     }
-  );
+    res.status(200).send(result);
+  });
 });
 
 module.exports = router;
