@@ -36,6 +36,10 @@ const RES_CART_ERR = {
   statusText: "FAILED_TO_FETCH_CART",
 };
 
+const RES_ORDER_ERR = {
+  statusText: "FAILED_TO_FETCH_ORDER",
+};
+
 const RES_ADD_TO_CART_FAILD = {
   statusText: "ADD_TO_CART_FAILURE",
 };

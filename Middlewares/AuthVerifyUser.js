@@ -8,7 +8,6 @@ const secretJWTToken = process.env.jwtSeceret;
 
 module.exports = async (req, res, next) => {
   const authHeader = req.headers.cookie;
-
   if (!authHeader)
     return res
       .status(404)

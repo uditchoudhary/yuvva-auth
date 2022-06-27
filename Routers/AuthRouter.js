@@ -12,6 +12,7 @@ const dotenv = require("dotenv");
 const verifyUser = require("../Middlewares/AuthVerifyUser");
 const verifyAdmin = require("../Middlewares/AuthVerifyAdmin");
 const { request } = require("express");
+const Orders = require("../Model/OrderSchema");
 dotenv.config();
 
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -352,10 +353,10 @@ router.post("/cartupdateitem", verifyUser, (req, res) => {
       );
       // Obj is the item we need to update
       if (obj) {
-        const oldTotal = result.total
+        const oldTotal = result.total;
         const oldItemTotalCost = obj.totalCost;
         const newItemTotalCost = price * quantity;
-        const newTotal = oldTotal - oldItemTotalCost + newItemTotalCost
+        const newTotal = oldTotal - oldItemTotalCost + newItemTotalCost;
         Cart.findOneAndUpdate(
           {
             userId: req.user.id,
@@ -365,7 +366,7 @@ router.post("/cartupdateitem", verifyUser, (req, res) => {
             $set: {
               "itemList.$.quantity": quantity,
               "itemList.$.totalCost": price * quantity,
-              total: newTotal
+              total: newTotal,
             },
           },
           { new: true },
@@ -420,5 +421,60 @@ router.post("/getTotalCart", verifyUser, (req, res) => {
     res.status(200).send(result);
   });
 });
+
+router.post("/addorder", verifyUser, (req, res) => {
+  const orderToAdd = req.body;
+  orderToAdd.userId = req.user.id;
+  Orders.create(orderToAdd, (err, result) => {
+    if (err) {
+      return res
+        .status(400)
+        .send(transformError(defResponse.RES_ORDER_ERR, err));
+    }
+    if (result) {
+      res.status(200).send(result);
+    }
+  });
+});
+
+router.post("/updateOrder", verifyUser, (req, res) => {
+  console.log("update order body received", req.body.orderId);
+  Orders.findOneAndUpdate(
+    {
+      orderId: req.body.orderid,
+    },
+    {
+      $set: {
+        txnStatus: req.body.orderStatus,
+        bank: req.body.bank,
+        orderDate: req.body.date,
+      },
+    },
+    { new: true },
+    (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_CART_ERR, err));
+      }
+      console.log("update order ", result);
+
+      return res.status(200).send(result);
+    }
+  );
+});
+
+router.get("/getOrders", verifyUser, (req, res) => {
+  Orders.find({
+    userId: req.user.id
+  }, (err, result) => {
+      if (err) {
+        return res
+          .status(400)
+          .send(transformError(defResponse.RES_ORDER_ERR, err));
+      }
+      return res.status(200).send(result);
+    });
+})
 
 module.exports = router;
