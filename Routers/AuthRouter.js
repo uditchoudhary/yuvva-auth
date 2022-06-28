@@ -98,6 +98,8 @@ router.post("/login", (req, res) => {
       if (!passValidity)
         return res.status(401).send(defResponse.RES_USER_UNAUTHORISED);
       else {
+        const { name, email, phone, isAdmin, address, _id } = user;
+        console.log(user);
         let accessToken = generateAccessToken(user._id);
         res
           .status(200)
@@ -106,7 +108,17 @@ router.post("/login", (req, res) => {
             secure: true,
             httpOnly: true,
           })
-          .send({ success: true });
+          .send({
+            success: true,
+            user: {
+              name,
+              email,
+              phone,
+              isAdmin,
+              address,
+              userId: _id,
+            },
+          });
       }
     }
   });
@@ -120,7 +132,7 @@ router.get("/profile", verifyUser, (req, res) => {
         .status(404)
         .send(transformError(defResponse.RES_USER_NOT_EXIST));
 
-    const { name, email, phone, isAdmin, address } = user;
+    const { name, email, phone, isAdmin, address, _id } = user;
 
     res.status(200).send({
       name,
@@ -128,6 +140,7 @@ router.get("/profile", verifyUser, (req, res) => {
       phone,
       isAdmin,
       address,
+      userId: req.user.id,
     });
   });
 });
@@ -164,6 +177,7 @@ router.post("/updateAddress", verifyUser, (req, res) => {
         phone,
         isAdmin,
         address,
+        userId: req.user.id,
       });
     }
   );
@@ -204,6 +218,7 @@ router.post("/updateUserDetails", verifyUser, (req, res) => {
         phone,
         isAdmin,
         address,
+        userId: req.user.id,
       });
     }
   );
@@ -465,16 +480,19 @@ router.post("/updateOrder", verifyUser, (req, res) => {
 });
 
 router.get("/getOrders", verifyUser, (req, res) => {
-  Orders.find({
-    userId: req.user.id
-  }, (err, result) => {
+  Orders.find(
+    {
+      userId: req.user.id,
+    },
+    (err, result) => {
       if (err) {
         return res
           .status(400)
           .send(transformError(defResponse.RES_ORDER_ERR, err));
       }
       return res.status(200).send(result);
-    });
-})
+    }
+  );
+});
 
 module.exports = router;
